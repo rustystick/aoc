@@ -1,4 +1,3 @@
-// this is shitty... takes 20mins to run; optimize later
 import * as fs from 'fs'
 /**
  * solve the issue
@@ -11,20 +10,49 @@ function solution(input) {
     let [seedLine, _, ...mapLines] = input.trim().split('\n');
     const mappers = createMappers(mapLines);
 
+    const findLoc = seed => {
+        let val = seed;
+        mappers.forEach(mapper => {
+            val = mapper.map(val);
+        })
+        return val;
+    }
+
+    const rangeMap = []
+
     const arr = parseAndMergeIntervals(seedLine);
 
-    for(const range of arr) {
-        let [seed, max] = range;
-        console.log(seed)
-        while(seed <= max) {
-            let val = seed;
-                mappers.forEach(mapper => {
-                    val = mapper.map(val);
-                })
-            min = Math.min(val, min);
-            seed += 1;
+    // since the ranges are always increasing upto some point... we can survey a subset 
+    // and then walk backwards to find the minimum val
+    // 
+    const FACTOR = 1000;
+    const pow = Math.trunc((arr[0][1] - arr[0][0]) / FACTOR) === 0 ? 1 : Math.trunc((arr[0][1] - arr[0][0]) / FACTOR);
+    
+    for(const [i, range] of arr.entries()) {
+        let [from, to] = range;
+        while(from < to) {
+            let res = findLoc(from);
+            if(res < min) {
+                min = res;
+                rangeMap[i] = from;
+            } 
+
+            from += pow;
         }
     }
+
+    for(let tempMinSeed of rangeMap) {
+        const to = tempMinSeed - pow;
+        while(tempMinSeed > to) {
+            const tempMinLoc = findLoc(tempMinSeed);
+            if(tempMinLoc > min) {
+                break;
+            }
+            min = tempMinLoc;
+            tempMinSeed -= 1;
+        }
+    }
+
     return min;
 }
 
