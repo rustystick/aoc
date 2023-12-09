@@ -1,8 +1,4 @@
 import * as fs from 'fs'
-
-
-// todo: union find;
-    
 /**
  * solve the issue
  *
@@ -110,4 +106,3 @@ const input = fs.readFileSync('./input.txt', 'utf8');
 console.log(`the solution 2 is: ${solution(input.trim())}`);
 
 export {solution}
-
